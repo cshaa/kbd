@@ -16,9 +16,14 @@ use embassy_usb::{Builder, Config, Handler};
 use usbd_hid::descriptor::{KeyboardReport, SerializedDescriptor};
 use {defmt_rtt as _, panic_probe as _};
 
+mod matrix;
+
 bind_interrupts!(struct Irqs {
     USBCTRL_IRQ => InterruptHandler<USB>;
 });
+
+const USB_VENDOR_OPENMOKO: u16 = 0x1d50;
+const USB_PRODUCT: u16 = 0xcafe;
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
@@ -27,7 +32,7 @@ async fn main(_spawner: Spawner) {
     let driver = Driver::new(p.USB, Irqs);
 
     // Create embassy-usb Config
-    let mut config = Config::new(0xc0de, 0xcafe);
+    let mut config = Config::new(USB_VENDOR_OPENMOKO, USB_PRODUCT);
     config.manufacturer = Some("Embassy");
     config.product = Some("HID keyboard example");
     config.serial_number = Some("12345678");
@@ -182,7 +187,9 @@ impl Handler for MyDeviceHandler {
     fn configured(&mut self, configured: bool) {
         self.configured.store(configured, Ordering::Relaxed);
         if configured {
-            info!("Device configured, it may now draw up to the configured current limit from Vbus.")
+            info!(
+                "Device configured, it may now draw up to the configured current limit from Vbus."
+            )
         } else {
             info!("Device is no longer configured, the Vbus current limit is 100mA.");
         }
