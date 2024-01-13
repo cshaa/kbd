@@ -1,6 +1,9 @@
 #![no_std]
 #![no_main]
 
+mod keys;
+mod matrix;
+
 use core::sync::atomic::{AtomicBool, Ordering};
 
 use defmt::*;
@@ -15,8 +18,6 @@ use embassy_usb::control::OutResponse;
 use embassy_usb::{Builder, Config, Handler};
 use usbd_hid::descriptor::{KeyboardReport, SerializedDescriptor};
 use {defmt_rtt as _, panic_probe as _};
-
-mod matrix;
 
 bind_interrupts!(struct Irqs {
     USBCTRL_IRQ => InterruptHandler<USB>;
